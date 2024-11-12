@@ -1,0 +1,4 @@
+Plans:
+- write the general background and theory (As instructions to our code)
+- discuss goals and extrapolation
+- design code structure and start coding
