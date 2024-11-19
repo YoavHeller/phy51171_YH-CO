@@ -38,7 +38,9 @@ class field:
        self.dx= (Xf-Xi)/num_cells
        self.field=np.zeros(num_cells)
        self.grid_pos= np.linspace(Xi, Xf, num_cells)
-	def compute_density_first_order_method(self,particles):
+
+
+   def compute_density_first_order_method(self,particles):
        	self.particles = particles
        	density = np.zeros(num_cells)
        	for par in particles:
