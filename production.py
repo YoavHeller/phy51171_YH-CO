@@ -44,7 +44,7 @@ class field:
        	self.particles = particles
        	density = np.zeros(num_cells)
        	for par in particles:
-           		par = (x,v,q,m)
+           par = (x,v,q,m)
        # Find the nearest grid point
            nearest_grid_point = int(np.round(x/dx))
            Xi = grid_pos[nearest_grid_point]
