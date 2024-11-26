@@ -1,0 +1,84 @@
+Code Structure
+
+The code is structured into these modules:
+Production, analysis and design.
+
+Production
+
+Use- runs the simulation.
+
+Classes
+	
+Particle-
+Represents individual particles in the simulation
+Attributes-  position, velocity, and charge mass.
+update_particle_positions() 
+Updates particle positions based on their velocities, leapfrog method and stuff.
+update_particle_velocities()
+Updates particle velocities based on the electric field.
+
+
+Field-
+Represents the electric field in 1D
+Attributes- grid points , field strength.
+compute_density()
+Calculates the charge density at each grid point, using the different 
+weighting methods?
+
+PicSimulation-
+Core class that sets up and manages the simulation parameters (e.g., number of particles, time step) and advances the simulation in time.
+Maybe has the functions in it. Also could store the data over time.
+Attributes- particle array, the field grid, current and saved data.
+
+Functions
+initialize_particles()
+Initialises particle positions and velocities according to the initial conditions. Takes an array of positions and velocity and creates the particles.
+
+solve_poisson()
+Solves Poisson’s equation to obtain the electric field from the charge density, using the computed density.
+advance_time_step()
+Advances the simulation by one time step by calling the functions above in sequence.
+
+Main Loop
+A `run_simulation()` function or a method in `PICSimulation` that iterates through time steps, saving relevant data (like particle positions and electric fields) for analysis and visualisation.
+
+
+
+ 2. Analysis
+https://chatgpt.com/share/67337861-bef4-800b-8e27-f17d97a355fc
+
+Classes
+DataProcessor
+ Class to handle the raw simulation data from the PicSimulation and compute quantities like kinetic energy, potential energy, and momentum. 
+
+Functions
+Any calculation for data we’d like to extrapolate: energy, momentum, FFT.
+“The dynamics of phase or velocity or distribution function space may be of interest in which case a movie might be made, probably from snapshots every dt or 2*dt”
+export_data()
+Saves processed data in a structured format (e.g., CSV or JSON) for further use.
+
+
+3. Visualization
+Classes
+Visualizer
+ A class that reads processed data and provides plotting capabilities.
+
+Functions
+Any visualisation we’d like to create. For example:    
+plot_density_profile()
+Plots the density profile over time or at a specific time step.
+plot_field_profile()
+Plots the electric field distribution at a specific time step.
+plot_energy_vs_time()
+ Plots kinetic and potential energy as a function of time to check energy conservation.
+animate_particles()
+Generates an animation showing particle positions over time.
+
+---
+
+Main script
+     - Import the `simulation`, `analysis`, and `visualization` modules.
+     - Create an instance of `PICSimulation` specifying the initial and parameters, aswell as the required data. call `run_simulation()` to generate data.
+     - Pass the output data to `DataProcessor` for analysis.
+     - Use `Visualizer` to visualize and animate the results.
+
