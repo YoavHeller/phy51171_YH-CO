@@ -18,11 +18,12 @@ class particle:
 
     def update_pos(self, dt):
         ## moves the particle with it's current velocity for the time jump dt
+        ## x_new = x + v*dt
         self.x += self.v * dt
 
     def update_vel(self, Field, dt):
-        ## changes the velocity by a given force, for time jump dt
-        ##calculated by newton
+        ## changes the velocity by a given field, for time jump dt
+        ## v_new = v+ a * dt = v+E*q/m * dt
         acceleration = (Feild * self.q) / self.m
         self.v += acceleration * dt
 
@@ -31,6 +32,10 @@ class field:
     ##class of the feild
     def __init__(self, Xi, Xf, num_cells):
         ## input of borders of the grid xi xf, and number of the cells.
+        ## parameters: dx cell size
+        ## field: for the feild (not used yet)
+        ## grid_pos: list of grid point positions
+        ## num celles: number of cells
         self.dx = (Xf - Xi) / num_cells
         self.field = np.zeros(num_cells) #used?
         self.grid_pos = np.linspace(Xi, Xf, num_cells)
@@ -67,7 +72,7 @@ class field:
 
             # Define the range of cells to influence (±2 cells around nearest point)
             cellleft = max(int(np.floor((x - width / 2) / self.dx)), 0)
-            cellright = min(int(np.floor((x + width / 2) / self.dx)), self.num_cells - 1)  # why use floor?
+            cellright = min(int(np.floor((x + width / 2) / self.dx)), self.num_cells - 1)
             for cell in range(xleft, xright + 1):
                 distance = abs(grid_pos[cell] - x)
                 if distance <= width:
@@ -117,7 +122,7 @@ class PicSimulation:
 
     def solve_poisson(self, particles, k):
         epsilon = 8, 85419 * 10 ** (-12)
-        density = compute_density_first_order_method(self, particles)
+        density = field.compute_density_first_order_method(self, particles)
         density_k = np.fft.fft(density)
         phi_k = density_k / (epsilon * k ** 2)
         phi = np.fft.ifft(phi_k).real
@@ -128,17 +133,6 @@ class PicSimulation:
         E[num_cells] = phi[num_cells - 1] / (2 * self.dx)
         return E
 
-    def time_step(self,particles,dt,Xi, Xf):
-        density = field.compute_density_first_order_method(self,particles)
-        k = 2*np.pi*np.fft.fftfreq(Xf-Xi, d=self.dx)
-        electric_fields = PicSimulation.solve_poisson(density, k)
-
-        for particle in particles:
-            (x, v, q, m) = particle
-            cell = int(np.round(x / self.dx))
-            E = electric_fields[cell]
-            particle.update_vel(self,E, dt)
-
-        for particle in particles:
-            particle.update_pos(self,dt)
-
+    # bluh bluh
+    def time_step:
+# bluh bluh
