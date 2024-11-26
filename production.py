@@ -128,7 +128,7 @@ class PicSimulation:
         E[num_cells] = phi[num_cells - 1] / (2 * self.dx)
         return E
 
-       def time_step(self,particles,dt,Xi, Xf):
+    def time_step(self,particles,dt,Xi, Xf):
         density = field.compute_density_first_order_method(self,particles)
         k = 2*np.pi*np.fft.fftfreq(Xf-Xi, d=self.dx)
         electric_fields = PicSimulation.solve_poisson(density, k)
