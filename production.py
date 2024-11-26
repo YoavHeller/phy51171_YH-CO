@@ -146,3 +146,18 @@ class PicSimulation:
 
         for particle in particles:
             particle.update_pos(self,dt)
+
+
+    def run_simulation(self, num_steps, dt,Xf,Xi):
+        particle_positions = []
+        particle_velocities = []
+        field_data = []
+
+        for step in range(num_steps):
+            particle_positions.append(np.array([particle.x for particle in self.particles]))
+            particle_velocities.append(np.array([particle.v for particle in self.particles]))
+            k = 2*np.pi*np.fft.fftfreq(Xf-Xi, d=self.dx)
+            field_data.append(self.solve_poisson(self, self.particles,k))
+            self.time_step(dt)
+
+        return particle_positions, particle_velocities, field_data
