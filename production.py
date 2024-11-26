@@ -157,7 +157,7 @@ class PicSimulation:
             particle.particles = [
                 particle(
                 x=np.random.uniform(Xi, Xf), 
-                v=np.random.uniform(-1, 1),  
+                v=np.random.uniform(-1, 1),  #0 for cold plasmas
                 q=1.0,  
                 m=1.0   )
             ]
