@@ -148,7 +148,16 @@ class PicSimulation:
             particle.update_pos(self,dt)
 
 
-    def run_simulation(self, num_steps, dt,Xf,Xi):
+    def run_simulation(self, num_steps, dt,Xf,Xi, num_par):
+        
+        for n in range(num_par):
+            self.particles = [
+                particle(
+                x=np.random.uniform(Xi, Xf), 
+                v=np.random.uniform(-1, 1),  
+                q=1.0,  
+                m=1.0   
+        ) ]
         particle_positions = []
         particle_velocities = []
         field_data = []
@@ -161,3 +170,4 @@ class PicSimulation:
             self.time_step(dt)
 
         return particle_positions, particle_velocities, field_data
+    
