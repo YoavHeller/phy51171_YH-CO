@@ -148,26 +148,26 @@ class PicSimulation:
             particle.update_pos(self,dt)
 
 
-    def run_simulation(self, num_steps, dt,Xf,Xi, num_par):
-        
+    def run_simulation(num_steps, dt,Xf,Xi, num_par,num_cell):
+        dx = (Xf-Xi)/num_cell
+        particle_positions = []
+        particle_velocities = []
+        field_data = []
         for n in range(num_par):
-            self.particles = [
+            particle.particles = [
                 particle(
                 x=np.random.uniform(Xi, Xf), 
                 v=np.random.uniform(-1, 1),  
                 q=1.0,  
-                m=1.0   
-        ) ]
-        particle_positions = []
-        particle_velocities = []
-        field_data = []
+                m=1.0   )
+            ]
 
         for step in range(num_steps):
-            particle_positions.append(np.array([par.x for par in self.particles]))
-            particle_velocities.append(np.array([par.v for par in self.particles]))
-            k = 2*np.pi*np.fft.fftfreq(Xf-Xi, d=self.dx)
-            field_data.append(self.solve_poisson(self, self.particles,k))
-            self.time_step(dt)
+            particle_positions.append(np.array([par.x for par in particle.particles]))
+            particle_velocities.append(np.array([par.v for par in particle.particles]))
+            k = 2*np.pi*np.fft.fftfreq(Xf-Xi, d=dx)
+            field_data.append(PicSimulation.solve_poisson(PicSimulation, particle.particles,k))
+            PicSimulation.time_step(dt)
 
         return particle_positions, particle_velocities, field_data
     
