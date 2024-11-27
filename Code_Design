@@ -35,7 +35,7 @@ Attributes- order_den: density calculation method, 0/1/2. dt: time steps. filed,
 Functions
 initialize_particles()- arrays of positions and velocities into an array of particles
 initialize_half_velocity- calculates the velocoties at t=-dt/2
-update_particles
+update_pos
 update field- calculatesfield from particles
 update_velocities
 time step- updates positions, update feild, update velocities and saves (?)
@@ -44,7 +44,9 @@ time step- updates positions, update feild, update velocities and saves (?)
 
 Main Loop
 A `run_simulation()` function or a method in `PICSimulation` that iterates through time steps, saving relevant data (like particle positions and electric fields) for analysis and visualisation.
-
+its structure:input- number of steps
+initialize_particles(), update field, initialize_half_velocity
+loop of time steps and also saving the saved data in arrays over time.
 
 
  2. Analysis
