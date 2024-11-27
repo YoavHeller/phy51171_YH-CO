@@ -6,6 +6,7 @@ import pandas as pd
 from numba import jit
 from scipy.integrate import quad
 
+
 class particle:
     ## class of a particle
 
@@ -38,14 +39,14 @@ class field:
         ## num celles: number of cells
         self.dx = (Xf - Xi) / num_cells
         self.grid_pos = np.linspace(Xi, Xf, num_cells)
-        self.num_cells=num_cells
+        self.num_cells = num_cells
 
-        self.field = np.zeros(num_cells) #used?
-        self.freqs=2*pi*np.array(np.linspace(-self.num_cells/2,self.num_cells/2+1,self.num_cells))/(self.dx*self.num_cells)
-        self.field_FFT=np.zeros(num_cells)
+        self.field = np.zeros(num_cells)  # used?
+        self.freqs = 2 * np.pi * np.fft.fftfreq(Xf - Xi, d=self.dx)
+        self.field_FFT = np.zeros(num_cells)
 
     def compute_density_first_order_method(self, particles):
-        ##Calculates particles density using 1st order method, taken to be the size of the grid cell
+        ##Calculates charge density using 1st order method, taken to be the size of the grid cell
         ## returns the density as an array in the grids positions
         density = np.zeros(self.num_cells)
         for par in particles:
@@ -56,7 +57,7 @@ class field:
                 continue
             Xi = grid_pos[nearest_grid_point]
             density[nearest_grid_point] += (q / self.dx) * (x - Xi + self.dx)
-            Xiplusone = grid_pos[nearest_grid_point+1]
+            Xiplusone = grid_pos[nearest_grid_point + 1]
             density[nearest_grid_point + 1] += (q / self.dx) * (Xiplusone - x)
 
         return density
@@ -71,7 +72,7 @@ class field:
 
             def squar_func(x):
 
-                    return lambda y: (abs(y-x)<=(width/2))*q/width
+                return lambda y: (abs(y - x) <= (width / 2)) * q / width
 
             # Define the range of cells to influence (±2 cells around nearest point)
             cellleft = max(int(np.floor((x - width / 2) / self.dx)), 0)
@@ -84,13 +85,14 @@ class field:
 
         return density
 
-    def compute_density_gaussian_density(self, particles):
+    def compute_density_gaussian(self, particles):
         density = np.zeros(num_cells)
-        sigma=2*self.dx
+        sigma = 2 * self.dx
+
         def gaussian_func(x0):
             # Normalization factor for Gaussian distribution
             A = q / (np.sqrt(2 * np.pi) * sigma)
-            return lambda x:  A * np.exp(-0.5 * ((x - x0) / sigma) ** 2)
+            return lambda x: A * np.exp(-0.5 * ((x - x0) / sigma) ** 2)
 
         for par in particles:
             (x, v, q, m) = par
@@ -100,79 +102,106 @@ class field:
             xleft = max(nearest_grid_point - num_points_to_cover, 0)
             xright = min(nearest_grid_point + num_points_to_cover, self.num_cells - 1)
             for cell in range(xleft, xright + 1):
-                Ai, _ = quad(gaussian_func(x), self.grid_pos(cell),self.grid_pos(cell+1))
+                Ai, _ = quad(gaussian_func(x), self.grid_pos(cell), self.grid_pos(cell + 1))
                 density[cell] += Ai
-
 
         return density
 
-    def density_feild(self,particles):
-        ## finds the electric potential of the density on the grid
+    def density_feild(self, density):
+        ## finds the electric potential and electrical field of the density on the grid
         ## puts the values in field and field_FFT
-        epsilon = 8, 85419 * 10 ** (-12) ##Units of ??
+        epsilon = 8, 85419 * 10 ** (-12)  ##Units of ??
 
-        density = field.compute_density_first_order_method(self, particles)
         density_FFT = np.fft.fft(density)
-        FFT_freq= 2*pi*np.array(np.linspace(-self.num_cells/2,self.num_cells/2+1,self.num_cells))/(self.dx*self.num_cells)
+        FFT_freq = 2 * pi * np.array(np.linspace(-self.num_cells / 2, self.num_cells / 2 + 1, self.num_cells)) / (
+                    self.dx * self.num_cells)
 
-        a = density_freq*self.dx/2
-        potential_correction=density_freq*sin(a)/(a)
-        potential_FFT=density_FFT/(epsilon*(potential_freq**2))
+        a = density_freq * self.dx / 2
+        potential_correction = density_freq * sin(a) / (a)
+        potential_FFT = density_FFT / (epsilon * (potential_freq ** 2))
 
-        b = 2*a
+        b = 2 * a
         feild_correction = density_freq * sin(b) / (b)
-        feild_FFT_Sol = -1*np.j*feild_correction*potential_FFT
-        feild_Sol=np.fft.ifft(feild_FFT)
+        feild_FFT_Sol = -1 * np.j * feild_correction * potential_FFT
+        feild_Sol = np.fft.ifft(feild_FFT)
 
-        self.field=feild_Sol
-        self.field_FFT=field_FFT_Sol
+        self.field = feild_Sol
+        self.field_FFT = field_FFT_Sol
+
 
 class PicSimulation:
     ##runs the simulation
+
+    def __init__(self, particle_positions, particle_velocities, q, m, Xi, Xf, num_cells, dt,
+                 save_field=false,save_FFT=false,save_pos=false,save_vel=false, order_den=0):
+        ##initiates the simulation by making a particle array with the positions and velocities, same mass and charge, and defining the feild.
+        self.order_den=order_den
+        self.dt=dt
+        self.field = field(Xi, Xf, num_cells)
+        if particle_positions.shape != particle_velocities.shape:
+            print("velocities and positions not the same size")
+        else:
+            self.particles = initialize_particles(particle_positions, particle_velocities, q, m)
+
+        self.save_field=save_field
+        self.save_pos=save_pos
+        self.save_FFT=save_FFT
+        self.save_vel=save_vel
+
     def initialize_particles(self, particle_positions, particle_velocities, q, m):
+        ##puts in the particles and their posiotions, with equal mass and charges
         self.num_particle = particle_positions.shape
         self.particles = np.array(dtype=particle)
         for i in range(num_particle):
             self.particles().append(particle(particle_positions(i), particle_velocities(i), q, m))
 
-    def PicSimulation(self, particle_positions, particle_velocities, q, m, Xi, Xf, num_cells):
-        ##initiates the simulation by making a particle array with the positions and velocities, same mass and charge, and defining the feild.
-        self.field = field(Xi, Xf, num_cells)
-        if particle_positions.shape != particle_velocities.shape:
-            print("velocities and positions not the same size")
+    def update_field(self):
+        if self.order_den == 0:
+            density = self.field.compute_density_first_order_method(self.particle)
         else:
-            self_particles = self.initialize_particles(particle_positions, particle_velocities, q, m)
+            if self.order_den == 1:
+                density = self.field.compute_density_triangle(self.particle)
+            else:
+                density = self.field.compute_density_gaussian(self.particle)
 
+        self.field.density_feild(density)
 
-    def time_step(self,particles,dt,Xi, Xf):
-        density = field.compute_density_first_order_method(field,particles)
-        k = 2*np.pi*np.fft.fftfreq(Xf-Xi, d=self.dx)
+    def initialize_half_vel(self):
+        ##calculates the velocoties at t=-dt/2
+
+    def update_vel(self):
+        ##updates the velocites with weighting the fields to the particles
+
+    def time_step(self, particles, dt, Xi, Xf):
+        density = field.compute_density_first_order_method(field, particles)
+        k = 2 * np.pi * np.fft.fftfreq(Xf - Xi, d=self.dx)
         electric_fields = PicSimulation.solve_poisson(density, k)
 
         for particle in particles:
             (x, v, q, m) = particle
             cell = int(np.round(x / self.dx))
             E = electric_fields[cell]
-            particle.update_vel(self,E, dt)
+            particle.update_vel(self, E, dt)
 
         for particle in particles:
-            particle.update_pos(self,dt)
+            particle.update_pos(self, dt)
 
-    def run_simulation(num_steps, dt,Xf,Xi, num_par,num_cells,q,m):
-        dx = (Xf-Xi)/num_cells
+    def run_simulation(num_steps, dt, Xf, Xi, num_par, num_cells, q, m):
+        dx = (Xf - Xi) / num_cells
         particle_positions = []
         particle_velocities = []
         field_data = []
-        particle_positions.append([x = np.random.uniform(Xi, Xf) for n in range(num_par)])
-        particle_velocities.append([v=np.random.uniform(-1, 1) for n in range(num_par)])  #0 for cold plasmas
+        particle_positions.append([x = np.random.uniform(Xi, Xf)
+        for n in range(num_par)])
+        particle_velocities.append([v = np.random.uniform(-1, 1)
+        for n in range(num_par)])  # 0 for cold plasmas
         PicSimulation(PicSimulation, particle_positions, particle_velocities, q, m, Xi, Xf, num_cells)
 
         for step in range(num_steps):
             particle_positions.append(np.array([par.x for par in particle.particles]))
             particle_velocities.append(np.array([par.v for par in particle.particles]))
-            k = 2*np.pi*np.fft.fftfreq(Xf-Xi, d=dx)
-            field_data.append(PicSimulation.solve_poisson(PicSimulation, particle.particles,k))
+            k = 2 * np.pi * np.fft.fftfreq(Xf - Xi, d=dx)
+            field_data.append(PicSimulation.solve_poisson(PicSimulation, particle.particles, k))
             PicSimulation.time_step(dt)
 
         return particle_positions, particle_velocities, field_data
-    
