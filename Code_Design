@@ -28,10 +28,15 @@ class PicSimulation-
 Core class that sets up and manages the simulation parameters (e.g., number of particles, time step) and advances the simulation in time.
 Also could store the data over time.
 Attributes- particle array, the field grid, current and saved data.
+takes as input the data you wanna save: position, velocity, potential (and FFT), field (and FFT).
 
 Functions
 initialize_particles()- arrays of positions and velocities into an array of particles
-time step- 
+initialize_half_velocity- calculates the velocoties at t=-dt/2
+update_particles
+update field- calculatesfield from particles
+update_velocities
+time step- updates positions, update feild, update velocities
 
 
 
