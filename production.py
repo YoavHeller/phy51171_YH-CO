@@ -24,7 +24,7 @@ class particle:
     def update_vel(self, Field, dt):
         ## changes the velocity by a given field, for time jump dt
         ## v_new = v+ a * dt = v+E*q/m * dt
-        acceleration = (Field * self.q) / self.m
+        acceleration = (Feild * self.q) / self.m
         self.v += acceleration * dt
 
 
@@ -37,9 +37,12 @@ class field:
         ## grid_pos: list of grid point positions
         ## num celles: number of cells
         self.dx = (Xf - Xi) / num_cells
-        self.field = np.zeros(num_cells) #used?
         self.grid_pos = np.linspace(Xi, Xf, num_cells)
         self.num_cells=num_cells
+
+        self.field = np.zeros(num_cells) #used?
+        self.freqs=2*pi*np.array(np.linspace(-self.num_cells/2,self.num_cells/2+1,self.num_cells))/(self.dx*self.num_cells)
+        self.field_FFT=np.zeros(num_cells)
 
     def compute_density_first_order_method(self, particles):
         ##Calculates particles density using 1st order method, taken to be the size of the grid cell
@@ -51,9 +54,9 @@ class field:
             nearest_grid_point = int(np.round(x / self.dx))
             if nearest_grid_point < 0 or nearest_grid_point >= self.num_cells:
                 continue
-            Xi = self.grid_pos[nearest_grid_point]
+            Xi = grid_pos[nearest_grid_point]
             density[nearest_grid_point] += (q / self.dx) * (x - Xi + self.dx)
-            Xiplusone = self.grid_pos[nearest_grid_point+1]
+            Xiplusone = grid_pos[nearest_grid_point+1]
             density[nearest_grid_point + 1] += (q / self.dx) * (Xiplusone - x)
 
         return density
@@ -67,13 +70,14 @@ class field:
             width = 2 * self.dx
 
             def squar_func(x):
+
                     return lambda y: (abs(y-x)<=(width/2))*q/width
 
             # Define the range of cells to influence (±2 cells around nearest point)
             cellleft = max(int(np.floor((x - width / 2) / self.dx)), 0)
             cellright = min(int(np.floor((x + width / 2) / self.dx)), self.num_cells - 1)
-            for cell in range(cellleft, cellright + 1):
-                distance = abs(self.grid_pos[cell] - x)
+            for cell in range(xleft, xright + 1):
+                distance = abs(grid_pos[cell] - x)
                 if distance <= width:
                     Ai, _ = quad(squar_func(x), self.grid_pos(cell), self.grid_pos(cell + 1))
                     density[cell] += Ai
@@ -81,7 +85,7 @@ class field:
         return density
 
     def compute_density_gaussian_density(self, particles):
-        density = np.zeros(self.num_cells)
+        density = np.zeros(num_cells)
         sigma=2*self.dx
         def gaussian_func(x0):
             # Normalization factor for Gaussian distribution
@@ -90,7 +94,7 @@ class field:
 
         for par in particles:
             (x, v, q, m) = par
-            nearest_grid_point = int(np.round(x / self.dx))
+            nearest_grid_point = int(np.round(x / dx))
             # Define bounds for integration based on Gaussian spread
             num_points_to_cover = int(3 * sigma / self.dx)  # Cover 3 sigma range for significant spread
             xleft = max(nearest_grid_point - num_points_to_cover, 0)
@@ -99,8 +103,29 @@ class field:
                 Ai, _ = quad(gaussian_func(x), self.grid_pos(cell),self.grid_pos(cell+1))
                 density[cell] += Ai
 
+
         return density
 
+    def density_feild(self,particles):
+        ## finds the electric potential of the density on the grid
+        ## puts the values in field and field_FFT
+        epsilon = 8, 85419 * 10 ** (-12) ##Units of ??
+
+        density = field.compute_density_first_order_method(self, particles)
+        density_FFT = np.fft.fft(density)
+        FFT_freq= 2*pi*np.array(np.linspace(-self.num_cells/2,self.num_cells/2+1,self.num_cells))/(self.dx*self.num_cells)
+
+        a = density_freq*self.dx/2
+        potential_correction=density_freq*sin(a)/(a)
+        potential_FFT=density_FFT/(epsilon*(potential_freq**2))
+
+        b = 2*a
+        feild_correction = density_freq * sin(b) / (b)
+        feild_FFT_Sol = -1*np.j*feild_correction*potential_FFT
+        feild_Sol=np.fft.ifft(feild_FFT)
+
+        self.field=feild_Sol
+        self.field_FFT=field_FFT_Sol
 
 class PicSimulation:
     ##runs the simulation
@@ -118,18 +143,6 @@ class PicSimulation:
         else:
             self_particles = self.initialize_particles(particle_positions, particle_velocities, q, m)
 
-    def solve_poisson(self, particles, k,num_cells):
-        epsilon = 8, 85419 * 10 ** (-12)
-        density = field.compute_density_first_order_method(self, particles)
-        density_k = np.fft.fft(density)
-        phi_k = density_k / (epsilon * k ** 2)
-        phi = np.fft.ifft(phi_k).real
-        E = np.zeros(num_cells)
-        E[0] = -phi[1] / (2 * self.dx)
-        for i in range(1, num_cells - 1):
-            E[i] = phi[i - 1] - phi[i + 1] / (2 * self.dx)
-        E[num_cells] = phi[num_cells - 1] / (2 * self.dx)
-        return E
 
     def time_step(self,particles,dt,Xi, Xf):
         density = field.compute_density_first_order_method(field,particles)
