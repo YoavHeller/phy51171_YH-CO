@@ -27,8 +27,10 @@ density_field- calculates the electric field from the density
 class PicSimulation-
 Core class that sets up and manages the simulation parameters (e.g., number of particles, time step) and advances the simulation in time.
 Also could store the data over time.
-Attributes- particle array, the field grid, current and saved data.
-takes as input the data you wanna save: position, velocity, potential (and FFT), field (and FFT).
+input:particle_positions, particle_velocities, q, m, Xi, Xf, num_cells, dt,
+                 save_field=false,save_FFT=false,save_pos=false,save_vel=false, order_den=0
+
+Attributes- order_den: density calculation method, 0/1/2. dt: time steps. filed, particles, and saving data.
 
 Functions
 initialize_particles()- arrays of positions and velocities into an array of particles
