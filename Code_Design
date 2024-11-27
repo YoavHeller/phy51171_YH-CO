@@ -36,7 +36,7 @@ initialize_half_velocity- calculates the velocoties at t=-dt/2
 update_particles
 update field- calculatesfield from particles
 update_velocities
-time step- updates positions, update feild, update velocities
+time step- updates positions, update feild, update velocities and saves (?)
 
 
 
