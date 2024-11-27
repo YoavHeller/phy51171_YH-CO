@@ -172,6 +172,9 @@ class PicSimulation:
     def update_vel(self):
         ##updates the velocites with weighting the fields to the particles
 
+    def update_pos(self):
+        ##updates the positions of the particles by their velocities
+
     def time_step(self, particles, dt, Xi, Xf):
         density = field.compute_density_first_order_method(field, particles)
         k = 2 * np.pi * np.fft.fftfreq(Xf - Xi, d=self.dx)
