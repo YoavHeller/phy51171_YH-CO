@@ -17,6 +17,9 @@ class particle:
         self.q = q
         self.m = m
 
+    def __iter__(self):
+        return iter(self.x, self.v, self.q, self.m)
+
     def update_pos(self, dt):
         ## moves the particle with it's current velocity for the time jump dt
         ## x_new = x + v*dt
@@ -27,6 +30,16 @@ class particle:
         ## v_new = v+ a * dt = v+E*q/m * dt
         acceleration = (Feild * self.q) / self.m
         self.v += acceleration * dt
+
+    def applied_field(self,field):
+        ##lineary calculates the field on the particle
+        grid_pos, field_val, dx= field
+        if self.x > grid.pos[-1] or self.x< grid.pos[0]:
+            return 0.0
+        nearest_grid_point = int(np.round(self.x / dx))
+        field_applied=((self.x-grid_pos[nearest_grid_point])/dx)*field_val[nearest_grid_point]+((grid_pos[nearest_grid_point+1]-self.x)/dx)*field_val[nearest_grid_point+1]
+        return field_applied
+
 
 
 class field:
@@ -44,6 +57,10 @@ class field:
         self.field = np.zeros(num_cells)  # used?
         self.freqs = 2 * np.pi * np.fft.fftfreq(Xf - Xi, d=self.dx)
         self.field_FFT = np.zeros(num_cells)
+
+    def __iter__(self):
+        ## iter fun of feild only returns the positions and values
+        return iter(self.grid_pos, self.field, dx)
 
     def compute_density_first_order_method(self, particles):
         ##Calculates charge density using 1st order method, taken to be the size of the grid cell
@@ -167,27 +184,21 @@ class PicSimulation:
         self.field.density_feild(density)
 
     def initialize_half_vel(self):
-        ##calculates the velocoties at t=-dt/2
+        ##calculates and changes the velocoties at t=-dt/2
+        for particle in self.particles:
+            particle.update_vel(particle.applied_field(self.field),-self.dt/2)
 
     def update_vel(self):
         ##updates the velocites with weighting the fields to the particles
+        for particle in self.particles:
+            particle.update_vel(particle.applied_field(self.field),self.dt)
 
     def update_pos(self):
         ##updates the positions of the particles by their velocities
+        for particle in self.particles:
+            particle.update_pos(self.dt)
 
-    def time_step(self, particles, dt, Xi, Xf):
-        density = field.compute_density_first_order_method(field, particles)
-        k = 2 * np.pi * np.fft.fftfreq(Xf - Xi, d=self.dx)
-        electric_fields = PicSimulation.solve_poisson(density, k)
-
-        for particle in particles:
-            (x, v, q, m) = particle
-            cell = int(np.round(x / self.dx))
-            E = electric_fields[cell]
-            particle.update_vel(self, E, dt)
-
-        for particle in particles:
-            particle.update_pos(self, dt)
+    
 
     def run_simulation(num_steps, dt, Xf, Xi, num_par, num_cells, q, m):
         dx = (Xf - Xi) / num_cells
