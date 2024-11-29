@@ -59,7 +59,7 @@ class field:
         self.field_FFT = np.zeros(num_cells)
 
     def __iter__(self):
-        ## iter fun of feild only returns the positions and values
+        ## iter fun of feild only returns the grid positions, and dx)
         return iter(self.grid_pos, self.field, dx)
 
     def compute_density_first_order_method(self, particles):
@@ -197,6 +197,7 @@ class PicSimulation:
             self.particles().append(particle(particle_positions(i), particle_velocities(i), q, m))
 
     def update_field(self):
+        ##updates the field by particle position
         if self.order_den == 0:
             density = self.field.compute_density_first_order_method(self.particle)
         else:
@@ -245,6 +246,7 @@ class PicSimulation:
             data[4].append(vel_array)
 
     def run_simulation(self, num_steps):
+        ##runs the simulation for num_steps times and return the data
         for i in range(num_steps):
             self.time_step()
 
