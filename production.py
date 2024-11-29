@@ -152,6 +152,7 @@ class PicSimulation:
     def __init__(self, particle_positions, particle_velocities, q, m, Xi, Xf, num_cells, dt,
                  save_field=false,save_FFT=false,save_pos=false,save_vel=false, order_den=0):
         ##initiates the simulation by making a particle array with the positions and velocities, same mass and charge, and defining the feild.
+        ##calculates the half value velocities and fields and saves the first data
         self.order_den=order_den
         self.dt=dt
         self.field = field(Xi, Xf, num_cells)
@@ -160,10 +161,33 @@ class PicSimulation:
         else:
             self.particles = initialize_particles(particle_positions, particle_velocities, q, m)
 
+        self.update_field()
+        self.initialize_half_vel()
+
         self.save_field=save_field
         self.save_pos=save_pos
         self.save_FFT=save_FFT
         self.save_vel=save_vel
+
+        self.data = np.array(size=5, dtype=np.array(dtype=float))
+        self.data[0].append(self.field.grid_pos)
+        self.data[0].append(self.field.freqs)
+
+
+        data[1].append(self.field.field)
+        data[2].append(self.field.field_FFT)
+        pos_array=np.array(dtype=float)
+        for particle in self.particles:
+            pos_array.append(particle.x)
+        data[3].append(pos_array)
+
+
+        vel_array = np.array(dtype=float)
+        for particle in self.particles:
+            pos_array.append(particle.v)
+        data[4].append(vel_array)
+
+
 
     def initialize_particles(self, particle_positions, particle_velocities, q, m):
         ##puts in the particles and their posiotions, with equal mass and charges
@@ -198,24 +222,30 @@ class PicSimulation:
         for particle in self.particles:
             particle.update_pos(self.dt)
 
-    
+    def time_step(self):
+        # propogates one time step and saves the data in data
+        self.update_pos()
+        self.update_field()
+        self.update_vel()
+        if self.save_field:
+            data[1].append(self.field.field)
+        if self.save_FFT:
+            data[2].append(self.field.field_FFT)
+        if self.save_pos:
+            pos_array=np.array(dtype=float)
+            for particle in self.particles:
+                pos_array.append(particle.x)
 
-    def run_simulation(num_steps, dt, Xf, Xi, num_par, num_cells, q, m):
-        dx = (Xf - Xi) / num_cells
-        particle_positions = []
-        particle_velocities = []
-        field_data = []
-        particle_positions.append([x = np.random.uniform(Xi, Xf)
-        for n in range(num_par)])
-        particle_velocities.append([v = np.random.uniform(-1, 1)
-        for n in range(num_par)])  # 0 for cold plasmas
-        PicSimulation(PicSimulation, particle_positions, particle_velocities, q, m, Xi, Xf, num_cells)
+            data[3].append(pos_array)
+        if self.save_vel:
+            vel_array = np.array(dtype=float)
+            for particle in self.particles:
+                pos_array.append(particle.v)
 
-        for step in range(num_steps):
-            particle_positions.append(np.array([par.x for par in particle.particles]))
-            particle_velocities.append(np.array([par.v for par in particle.particles]))
-            k = 2 * np.pi * np.fft.fftfreq(Xf - Xi, d=dx)
-            field_data.append(PicSimulation.solve_poisson(PicSimulation, particle.particles, k))
-            PicSimulation.time_step(dt)
+            data[4].append(vel_array)
 
-        return particle_positions, particle_velocities, field_data
+    def run_simulation(self, num_steps):
+        for i in range(num_steps):
+            self.time_step()
+
+        return self.data
