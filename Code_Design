@@ -11,44 +11,43 @@ Classes
 	
 class Particle-
 Represents individual particles in the simulation
-Attributes-  position, velocity, charge and mass.
+Attributes-  position(x), velocity(v), charge(q) and mass(m).
 functions
-update_particle_positions(): Updates particle positions based on their velocities.
-update_particle_velocities(): Updates velocitites for given field.
-applied_field: takes a field and calculates the averaged field on the particle
+iter- returns all the attributes
+update_particle_positions(dt): Updates particle positions based on their velocities.
+update_particle_velocities(field): Updates velocitites for given field.
+applied_field: takes a field and calculates the lineary averaged field on the particle
 
 class Field-
 Represents the electric field in 1D
-input- range and num of grid points
 Attributes- dx grid size, grid_pos array of positions of the grid points, num of cells, field, frequencies and FFT of field
 Functions:
-compute_density()- takes particles and calculated their density in the grid points in different methods
-density_field- calculates the electric field from the density
+innit- defined by left border(Xi), right border(Xf), and number of cells(num_cells)
+iter- returns 
+compute_density()- takes particles and returns their density in the grid points in different methods
+density_field- calculates the electric field from the density. puts in the value of field and field_FFT
+
 
 class PicSimulation-
 Core class that sets up and manages the simulation parameters (e.g., number of particles, time step) and advances the simulation in time.
-Also could store the data over time.
-input:particle_positions, particle_velocities, q, m, Xi, Xf, num_cells, dt,
-                 save_field=false,save_FFT=false,save_pos=false,save_vel=false, order_den=0
+Also stores the data over time.
 
-Attributes- order_den: density calculation method, 0/1/2. dt: time steps. filed, particles, and saving data.
+Attributes- order_den: density calculation method, 0/1/2. dt: time steps. field, particles, and data.
 
 Functions
+innit- input:particle_positions, particle_velocities, q, m, Xi, Xf, num_cells, dt, 
+save_field=false,save_FFT=false,save_pos=false,save_vel=false, order_den=0
+creates the array particles, the field, and updates the field and the velocities to be in t= -dt/2.
+saves the initial values.
 initialize_particles()- arrays of positions and velocities into an array of particles
 initialize_half_velocity- calculates the velocoties at t=-dt/2
-update_pos
-update field- calculatesfield from particles
-update_velocities
-time step- updates positions, update feild, update velocities and saves (?)
+update_pos- moves all the particles in dt
+update field- updates field from particles
+update_velocities- updates velocities with applied field
+time step- updates positions, update feild, update velocities and saves requested data
+run simulation(num_steps)- runs the simulation for num_steps times and return the data
 
-
-
-Main Loop
-A `run_simulation()` function or a method in `PICSimulation` that iterates through time steps, saving relevant data (like particle positions and electric fields) for analysis and visualisation.
-its structure:input- number of steps
-initialize_particles(), update field, initialize_half_velocity
-loop of time steps and also saving the saved data in arrays over time.
-
+main loop- define with initial values, run and save.
 
  2. Analysis
 https://chatgpt.com/share/67337861-bef4-800b-8e27-f17d97a355fc
