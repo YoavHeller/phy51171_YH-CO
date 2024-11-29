@@ -15,6 +15,7 @@ Attributes-  position, velocity, charge and mass.
 functions
 update_particle_positions(): Updates particle positions based on their velocities.
 update_particle_velocities(): Updates velocitites for given field.
+applied_field: takes a field and calculates the averaged field on the particle
 
 class Field-
 Represents the electric field in 1D
