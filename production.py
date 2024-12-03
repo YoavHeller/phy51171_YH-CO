@@ -92,7 +92,7 @@ class field:
 
                 return lambda y: (abs(y - x) <= (width / 2)) * q / width
 
-            # Define the range of cells to influence (±2 cells around nearest point)
+            # Define the range of cells to influence
             cellleft = max(int(np.floor((x - width / 2) / self.dx)), 0)
             cellright = min(int(np.floor((x + width / 2) / self.dx)), self.num_cells - 1)
             for cell in range(cellleft, cellright + 1):
@@ -128,26 +128,26 @@ class field:
     def density_field(self, density):
         ## finds the electric potential and electrical field of the density on the grid
         ## puts the values in field and field_FFT
-        epsilon = 8.85419 * 10 ** (-12)  ##Units of ??
+        epsilon = 8.85419 * 10 ** (-12)  #permittivity, in F/m
 
         density_FFT = np.fft.fft(density)
 
         a=self.freqs*self.dx
 
-        potential_correction=np.sinc(a/(2*np.pi))
-        potential_correction=np.nan_to_num(potential_correction, nan=0.0)
+        potential_correction = np.sinc(a/(2*np.pi))
+        potential_correction = np.nan_to_num(potential_correction, nan=0.0)
         potential_correction = self.freqs * potential_correction
 
         potential_FFT = density_FFT / (epsilon * (potential_correction ** 2))
 
-        field_correction=np.sinc(a/(np.pi))
-        field_correction=np.nan_to_num(field_correction, nan=0.0)
-        field_correction = self.freqs* field_correction
+        field_correction = np.sinc(a/(np.pi))
+        field_correction = np.nan_to_num(field_correction, nan=0.0)
+        field_correction = self.freqs * field_correction
 
         field_FFT_Sol = -1j * field_correction * potential_FFT
         field_Sol = np.fft.ifft(field_FFT_Sol)
 
-        self.field =np.real(field_Sol)
+        self.field = np.real(field_Sol)
         self.field_FFT = field_FFT_Sol
 
 
@@ -156,7 +156,7 @@ class PicSimulation:
 
     def __init__(self, particle_positions, particle_velocities, q, m, Xi, Xf, num_cells, dt,
                  save_field=False,save_FFT=False,save_pos=False,save_vel=False, order_den=0):
-        ##initiates the simulation by making a particle array with the positions and velocities, same mass and charge, and defining the field.
+        ##initiates the simulation by making a particle array with the positions and velocities, same mass and charge, and defining the field
         ##calculates the half value velocities and fields and saves the first data
         self.order_den=order_den
         self.dt=dt
@@ -178,20 +178,19 @@ class PicSimulation:
         self.data[0] = []
         self.data[1] = []
         self.data[2] = []
-        self.data[3] =[]
+        self.data[3] = []
         self.data[4] = []
 
         self.data[0].append(np.array(self.field.grid_pos))
         self.data[0].append(np.array(self.field.freqs))
 
-
         self.data[1].append(np.array(self.field.field))
         self.data[2].append(np.array(self.field.field_FFT))
         pos_array=np.empty((0,), dtype=float)
+                     
         for particle in self.particles:
             pos_array=np.append(pos_array,particle.x)
         self.data[3].append(np.array(pos_array))
-
 
         vel_array = np.empty((0,), dtype=float)
         for particle in self.particles:
@@ -201,14 +200,14 @@ class PicSimulation:
 
 
     def initialize_particles(self, particle_positions, particle_velocities, q, m):
-        ##puts in the particles and their posiotions, with equal mass and charges
+        ## puts in the particles and their posiotions, with equal mass and charges
         self.num_particle = len(particle_positions)
         self.particles = []
         for i in range(self.num_particle):
             self.particles.append(particle(particle_positions[i], particle_velocities[i], q, m))
 
     def update_field(self):
-        ##updates the field by particle position
+        ## updates the field by particle position
         if self.order_den == 0:
             density = self.field.compute_density_first_order_method(self.particles)
         else:
@@ -220,17 +219,17 @@ class PicSimulation:
         self.field.density_field(density)
 
     def initialize_half_vel(self):
-        ##calculates and changes the velocoties at t=-dt/2
+        ## calculates and changes the velocoties at t=-dt/2
         for particle in self.particles:
             particle.update_vel(particle.applied_field(self.field),-1*self.dt/2)
 
     def update_vel(self):
-        ##updates the velocites with weighting the fields to the particles
+        ## updates the velocites with weighting the fields to the particles
         for particle in self.particles:
             particle.update_vel(particle.applied_field(self.field),self.dt)
 
     def update_pos(self):
-        ##updates the positions of the particles by their velocities
+        ## updates the positions of the particles by their velocities
         for particle in self.particles:
             particle.update_pos(self.dt)
 
