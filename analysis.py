@@ -42,7 +42,7 @@ class DataProcessor:
             plt.scatter(density_profile, [t] * len(density_profile), label=f"Step {t}")
             plt.xlabel("density")
             plt.ylabel("Time Step")
-            plt.title("Density Over Time (20 Particles)")
+            plt.title("Density Over Time")
             plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')  # Place the legend outside the plot
             plt.tight_layout()
             plt.show()
@@ -52,17 +52,17 @@ class DataProcessor:
             plt.scatter(energy, [t] * len(energy), label=f"Step {t}")
             plt.xlabel("energy")
             plt.ylabel("Time Step")
-            plt.title("Energy Over Time (20 Particles)")
+            plt.title("Energy Over Time")
             plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')  # Place the legend outside the plot
             plt.tight_layout()
             plt.show()
         if show_momentum:
             momentum = momentum(self, simulation.m)
             plt.figure(figsize=(10, 6))
-            plt.scatter(momentum, [t] * len(density_profile), label=f"Step {t}")
+            plt.scatter(momentum, [t] * len(momentum), label=f"Step {t}")
             plt.xlabel("momentum")
             plt.ylabel("Time Step")
-            plt.title("Momentum Over Time (20 Particles)")
+            plt.title("Momentum Over Time")
             plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')  # Place the legend outside the plot
             plt.tight_layout()
             plt.show()
