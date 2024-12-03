@@ -3,7 +3,6 @@ import scipy
 import matplotlib.pyplot as plt
 import h5py
 import pandas as pd
-from numba import jit
 from scipy.integrate import quad
 
 from matplotlib.animation import FuncAnimation
@@ -203,7 +202,9 @@ class PicSimulation:
             q_full=np.append(q_full,np.full(len(particle_positions[group]), q_array[group]))
             m_full=np.append(m_full,np.full(len(particle_positions[group]),m_array[group]))
 
-        self.data[0].append([q_full,m_full])
+        self.data[0].append(np.array([q_full]))
+        self.data[0].append(np.array([m_full]))
+
 
         self.data[1].append(np.array(self.field.field))
         self.data[2].append(np.array(self.field.field_FFT))
@@ -328,7 +329,7 @@ simulation = PicSimulation(
 results = simulation.run_simulation(10)
 
 # Extract particle positions over time from results[3] (time steps stored here)
-particle_positions_over_time = results[4]  # Assuming this stores the particle positions over time.
+particle_positions_over_time = results[3]  # Assuming this stores the particle positions over time.
 
 # Create a figure for the plot
 plt.figure(figsize=(10, 6))
