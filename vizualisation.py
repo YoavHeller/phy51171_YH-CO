@@ -2,47 +2,47 @@ import numpy as np
 import matplotlib as plt
 
 
-def plot_density_profile(simulation):
-   density_profile = density_profile(self, simulation.num_cells)
+def plot_density_profile():
+   density_profile = DataProcessor.analysis.density_profile()
    plt.figure(figsize=(10, 6))
-   plt.scatter(density_profile, [t] * len(density_profile), label=f"Step {t}")
-   plt.xlabel("density")
-   plt.ylabel("Time Step")
+   plt.plot([t for t in range(analysis.time_steps)],density_profile)
+   plt.xlabel("Time Step")
+   plt.ylabel("Density")
    plt.title("Density Over Time")
-   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')  # Place the legend outside the plot
+   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left') 
    plt.tight_layout()
    plt.show()
    
-def plot_energy_vs_time(simulation):
-   energy = energy(self,simulation.m, simulation.q)
+def plot_energy_vs_time():
+   energy = DataProcessor.analysis.energy()
    plt.figure(figsize=(10, 6))
-   plt.scatter(energy[0], [t] * len(energy), label=f"Step {t}")
-   plt.xlabel("kinetic and electric energy")
-   plt.ylabel("Time Step")
-   plt.title("Kinetic and electric energy Over Time")
-   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')  # Place the legend outside the plot
+   plt.plot([t for t in range(DataProcessor.analysis.time_steps)],energy)
+   plt.ylabel("Kinetic energy")
+   plt.xlabel("Time Step")
+   plt.title("Kinetic energy Over Time")
+   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left') 
    plt.tight_layout()
    plt.show()
 
-def plot_momentum(simulation):
-   momentum = momentum(self, simulation.num_cells)
+def plot_momentum():
+   momentum = DataProcessor.analysis.momentum()
    plt.figure(figsize=(10, 6))
-   plt.scatter(momentum, [t] * len(density_profile), label=f"Step {t}")
-   plt.xlabel("momentum")
-   plt.ylabel("Time Step")
+   plt.plot([t for t in range(DataProcessor.analysis.time_steps)],momentum)
+   plt.ylabel("Momentum")
+   plt.xlabel("Time Step")
    plt.title("Momemtum Over Time")
-   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')  # Place the legend outside the plot
+   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left') 
    plt.tight_layout()
    plt.show()
    
-def plot_field_profile(simulation):
-   field = simulation.data[1]
+def plot_field_profile(time):
+   field = DataProcessor.field()[time]
    plt.figure(figsize=(10, 6))
-   plt.scatter(Field, [t] * len(density_profile), label=f"Step {t}")
-   plt.xlabel("momentum")
-   plt.ylabel("Time Step")
-   plt.title("Momemtum Over Time")
-   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')  # Place the legend outside the plot
+   plt.plot([x for x in range(DataProcessor.analysis.num_cells)], field)
+   plt.xlabel("Position")
+   plt.ylabel("Field")
+   plt.title("Field at time" + time)
+   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left') 
    plt.tight_layout()
    plt.show()
 
