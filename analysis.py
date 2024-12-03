@@ -19,9 +19,7 @@ class DataProcessor:
         for t in range(len(self.time_steps)):
             kinetic_energy = m * np.sum(self.velocities[t] ** 2)/2
             electric_energy = q * np.sum(self.electric_field[t] ** 2)/2
-
             self.energy.append((kinetic_energy, electric_energy))
-        
         return self.energy
 
     def momentum(self, m):
