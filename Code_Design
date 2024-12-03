@@ -44,7 +44,7 @@ initialize_half_velocity- calculates the velocoties at t=-dt/2
 update_pos- moves all the particles in dt
 update field- updates field from particles
 update_velocities- updates velocities with applied field
-time step- updates positions, update feild, update velocities and saves requested data
+time step- updates positions, update field, update velocities and saves requested data
 run simulation(num_steps)- runs the simulation for num_steps times and return the data
 
 main loop- define with initial values, run and save.
