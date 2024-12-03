@@ -1,11 +1,12 @@
 # analysis.py
 import numpy as np
 import matplotlib.pyplot as plt
+from production import results
 
 
 class DataProcessor:
     def __init__(self, data):
-        self.num_cells = data[0][0]
+        self.num_cells = len(data[0][0])
         self.q = data[0][2]
         self.m = data[0][3]
         self.electric_field = data[1]
@@ -45,10 +46,10 @@ class DataProcessor:
         return [density_profiles,energy,momentum]
 
 
-data = [[2,1,2,3],[1,2,2],[1,2,2],[1,2,2],[1,2,2]]
+data = results
 
 processor = DataProcessor(data)
 analysis = processor.analysis()
-array = [data,analysis]
+full_data_array = [data,analysis]
 
-print(array)
+print(full_data_array)
