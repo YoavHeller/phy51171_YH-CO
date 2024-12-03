@@ -175,11 +175,11 @@ class PicSimulation:
         self.save_vel=save_vel
 
         self.data = np.empty((5,), dtype=object)
-        self.data[0] = []
-        self.data[1] = []
-        self.data[2] = []
-        self.data[3] = []
-        self.data[4] = []
+        self.data[0] = []  #two arrays: (grid_pos, freqs k's)
+        self.data[1] = []  #value of the field
+        self.data[2] = []  #fft of the field
+        self.data[3] = []  #positions of the particles
+        self.data[4] = []  #values of the velocities
 
         self.data[0].append(np.array(self.field.grid_pos))
         self.data[0].append(np.array(self.field.freqs))
