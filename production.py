@@ -1,7 +1,6 @@
 import numpy as np
 import scipy
 import matplotlib.pyplot as plt
-import h5py
 import pandas as pd
 from scipy.integrate import quad
 
@@ -131,16 +130,16 @@ class field:
             xleft = max(nearest_grid_point - num_points_to_cover, 0)
             xright = min(nearest_grid_point + num_points_to_cover, self.num_cells - 1)
             for cell in range(xleft, xright + 1):
-                if cell > 0 and cell < len(self.grid_pos)-1:
-                    Ai, _ = quad(gaussian_func(x), self.grid_pos[cell], self.grid_pos[cell + 1])
-                    density[cell] += Ai
+                cell=cell%(len(self.grid_pos)-1)
+                Ai, _ = quad(gaussian_func(x), self.grid_pos[cell], self.grid_pos[cell + 1])
+                density[cell] += Ai
 
         return density
 
     def density_field(self, density):
         ## finds the electric potential and electrical field of the density on the grid
         ## puts the values in field and field_FFT
-        epsilon = 8.85419 * 10 ** (-12)  # permittivity, in F/m
+        epsilon = 8.85419 * 10 ** (-12)  # permittivity, in F/m SI
 
         density_FFT = np.fft.fft(density)
 
@@ -285,10 +284,14 @@ class PicSimulation:
 
 
 num_cells=5000
-Xi, Xf = -150.0, 150.0
-dt = 0.001
-q = 0.0003
-m=10000
+Xi, Xf = -150.0, 150.0 #[meters]
+dt = 1*(10**-10) #seconds
+qe=1.60218*(10**-19) ##Colomb
+me=9.109*(10**-31) ##kg
+Group_Size=100000
+
+q = qe*Group_Size
+m=me*Group_Size
 
 # Initialize positions for protons and electrons as homogeneous distributions
 num_electrons1 = 25# Set the number of electrons
@@ -307,7 +310,7 @@ proton_velocity = np.zeros(num_protons)          # Homogeneous velocity for prot
 
 # Set charges and masses
 m_electron = m
-m_proton = m * 1000
+m_proton = m * 1836
 
 # Run the simulation with these new initial conditions
 simulation = PicSimulation(
