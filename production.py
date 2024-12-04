@@ -186,7 +186,7 @@ class PicSimulation:
         self.save_vel = save_vel
 
         self.data = np.empty((5,), dtype=object)
-        self.data[0] = []  # two arrays: (grid_pos, freqs k's, q, m)
+        self.data[0] = []  #  arrays: (grid_pos, freqs k's, q, m)
         self.data[1] = []  # value of the field
         self.data[2] = []  # fft of the field
         self.data[3] = []  # positions of the particles
@@ -285,7 +285,7 @@ class PicSimulation:
 
 num_cells=5000
 Xi, Xf = -150.0, 150.0 #[meters]
-dt = 1*(10**-10) #seconds
+dt = 1*(10**-12) #seconds
 qe=1.60218*(10**-19) ##Colomb
 me=9.109*(10**-31) ##kg
 Group_Size=100000
@@ -304,8 +304,8 @@ electron_positions2 = np.linspace(Xi, Xf, num_electrons2)
 proton_positions = np.linspace(Xi, Xf, num_protons)
 
 # Set initial velocities for electrons and protons
-electron_velocity1 = np.full(num_electrons1, 0.1)  # Homogeneous velocity for electrons (e.g., 0.1)
-electron_velocity2 = np.full(num_electrons2, -0.1)  # Homogeneous velocity for electrons (e.g., 0.1)
+electron_velocity1 = np.full(num_electrons1, 0.001)  # Homogeneous velocity for electrons (e.g., 0.1)
+electron_velocity2 = np.full(num_electrons2, -0.001)  # Homogeneous velocity for electrons (e.g., 0.1)
 proton_velocity = np.zeros(num_protons)          # Homogeneous velocity for protons (0)
 
 # Set charges and masses
@@ -332,7 +332,7 @@ simulation = PicSimulation(
 results = simulation.run_simulation(10)
 
 # Extract particle positions over time from results[3] (time steps stored here)
-particle_positions_over_time = results[3]  # Assuming this stores the particle positions over time.
+particle_positions_over_time = results[4]  # Assuming this stores the particle positions over time.
 
 # Create a figure for the plot
 plt.figure(figsize=(10, 6))
