@@ -9,7 +9,13 @@ from analysis import full_data_array
 
 
 def plot_density_profile(full_data_array):
-   density_profile = full_data_array[1]
+   data = full_data_array[0]
+   density_profile = full_data_array[1][0]
+   grid_pos = data[0][0]
+   Xi = grid_pos[0]
+   Xf = grid_pos[len(grid_pos)-1]
+   fig, ax = plt.subplots()
+   ax.set_xlim(Xi,Xf)
    plt.figure(figsize=(10, 6))
    plt.plot([t for t in range(analysis.DataProcessor.time_steps)],density_profile)
    plt.xlabel("Time Step")
@@ -20,8 +26,13 @@ def plot_density_profile(full_data_array):
    plt.show()
    
 def plot_energy_vs_time(full_data_array):
-   energy = full_data_array[2]
-   plt.figure(figsize=(10, 6))
+   data = full_data_array[0]
+   energy = full_data_array[1][1]
+   grid_pos = data[0][0]
+   Xi = grid_pos[0]
+   Xf = grid_pos[len(grid_pos)-1]
+   fig, ax = plt.subplots()
+   ax.set_xlim(Xi,Xf)
    plt.plot([t for t in range(analysis.DataProcessor.time_steps)],energy)
    plt.ylabel("Kinetic energy")
    plt.xlabel("Time Step")
@@ -30,10 +41,15 @@ def plot_energy_vs_time(full_data_array):
    plt.tight_layout()
    plt.show()
 
-def plot_momentum(full_data_array):
-   momentum = full_data_array[3]
-   plt.figure(figsize=(10, 6))
-   plt.plot([t for t in range(analysis.DataProcessor.time_steps)],momentum)
+def plot_momentum(full_data_array,step):
+   data = full_data_array[0]
+   momentum = full_data_array[1][2]
+   grid_pos = data[0][0]
+   Xi = grid_pos[0]
+   Xf = grid_pos[len(grid_pos)-1]
+   fig, ax = plt.subplots()
+   ax.set_xlim(Xi,Xf)
+   plt.plot([t for t in range(step)],momentum)
    plt.ylabel("Momentum")
    plt.xlabel("Time Step")
    plt.title("Momemtum Over Time")
@@ -44,28 +60,39 @@ def plot_momentum(full_data_array):
 def plot_field_profile(full_data_array,step):
    data = full_data_array[0]
    field = data[1]
-   num_cells = data[0][0]
-   plt.figure(figsize=(10, 6))
-   plt.plot([x for x in range(num_cells)], field[step])
+   positions = data[3]
+   grid_pos = data[0][0]
+   Xi = grid_pos[0]
+   Xf = grid_pos[len(grid_pos)-1]
+   fig, ax = plt.subplots()
+   ax.set_xlim(Xi,Xf)
+   ax.scatter(grid_pos, field[step], color='b', marker='o',s=1, linewidths=0.5)
    plt.xlabel("Position")
    plt.ylabel("Field")
-   plt.title("Field at step" + step)
-   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left') 
+   plt.title("Field at step " + str(step))
    plt.tight_layout()
    plt.show()
 
 def plot_velocity_profile(full_data_array,step):
    data = full_data_array[0]
    velocities = data[4]
-   num_cells = len(data[0][0])
-   plt.figure(figsize=(10, 6))
-   plt.plot([x for x in range(num_cells)], velocities[step])
+   positions = data[3]
+   grid_pos = data[0][0]
+   Xi = grid_pos[0]
+   Xf = grid_pos[len(grid_pos)-1]
+   fig, ax = plt.subplots()
+   ax.set_xlim(Xi,Xf)
+   plt.plot(positions[step], velocities[step])
    plt.xlabel("Position")
    plt.ylabel("Velocity")
-   plt.title("Velocity at step" + step)
+   plt.title("Velocity at step "+ str(step))
    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left') 
    plt.tight_layout()
    plt.show()
 
 
-print(plot_velocity_profile(full_data_array,2))
+print(plot_velocity_profile(full_data_array,10))
+print(plot_field_profile(full_data_array,10))
+print(plot_momentum(full_data_array))
+print(plot_energy_vs_time(full_data_array))
+print(plot_density_profile(full_data_array))
