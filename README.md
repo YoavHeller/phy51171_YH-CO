@@ -1,4 +1,4 @@
-# phy51171_YH-CO : Particle-In-Cell Simulations of the Two-Stream Instability
+# phy51171_YH-CO : Particle-In-Cell Simulation of the Two-Stream Instability
 
 ## Description
 This project simulates a one-dimensional electrostatic two-stream instability using the Particle-In-Cell (PIC) method. The goal is to investigate the conditions under which two counterstreaming electron beams with equal density and opposite velocities lead to the two-stream instability.
