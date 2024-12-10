@@ -172,6 +172,9 @@ class PicSimulation:
         self.order_den = order_den
         self.dt = dt
         self.field = field(Xi, Xf, num_cells)
+        self.num_cells = num_cells
+        self.dx = (Xf - Xi) / num_cells
+        self.grid_pos = np.linspace(Xi, Xf, num_cells)
 
         self.particles = []
         for group in range(len(particle_positions)):
@@ -185,12 +188,13 @@ class PicSimulation:
         self.save_FFT = save_FFT
         self.save_vel = save_vel
 
-        self.data = np.empty((5,), dtype=object)
+        self.data = np.empty((6,), dtype=object)
         self.data[0] = []  #  arrays: (grid_pos, freqs k's, q, m)
         self.data[1] = []  # value of the field
         self.data[2] = []  # fft of the field
         self.data[3] = []  # positions of the particles
         self.data[4] = []  # values of the velocities
+        self.data[5] = []  #values of the densities
 
         self.data[0].append(np.array(self.field.grid_pos))
         self.data[0].append(np.array(self.field.freqs))
@@ -204,7 +208,6 @@ class PicSimulation:
         self.data[0].append(np.array([q_full]))
         self.data[0].append(np.array([m_full]))
 
-
         self.data[1].append(np.array(self.field.field))
         self.data[2].append(np.array(self.field.field_FFT))
         pos_array = np.empty((0,), dtype=float)
@@ -217,6 +220,8 @@ class PicSimulation:
         for particle in self.particles:
             vel_array = np.append(vel_array, particle.v)
         self.data[4].append(np.array(vel_array))
+
+        self.data[5].append(field.compute_density_gaussian(self, self.particles))
 
     def initialize_particles(self, particle_positions, particle_velocities, q, m):
         ## puts in the particles and their posiotions, with equal mass and charges
@@ -272,6 +277,7 @@ class PicSimulation:
                 vel_array = np.append(vel_array, particle.v)
 
             self.data[4].append(np.array(vel_array))
+        self.data[5].append(field.compute_density_gaussian(self, self.particles))
 
     def run_simulation(self, num_steps):
         ##runs the simulation for num_steps times and return the data
@@ -294,9 +300,9 @@ q = qe*Group_Size
 m=me*Group_Size
 
 # Initialize positions for protons and electrons as homogeneous distributions
-num_electrons1 = 25# Set the number of electrons
-num_electrons2 = 25
-num_protons = 50    # Set the number of protons
+num_electrons1 = 250# Set the number of electrons
+num_electrons2 = 250
+num_protons = 500    # Set the number of protons
 
 # Homogeneous distribution across the grid, Xi to Xf
 electron_positions1 = np.linspace(Xi, Xf, num_electrons1)
@@ -329,7 +335,9 @@ simulation = PicSimulation(
 )
 
 # Run simulation for 10 steps
-results = simulation.run_simulation(10)
+steps = 10
+results = simulation.run_simulation(steps)
+
 
 # Extract particle positions over time from results[3] (time steps stored here)
 particle_positions_over_time = results[4]  # Assuming this stores the particle positions over time.
