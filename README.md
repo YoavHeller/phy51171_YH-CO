@@ -1,25 +1,24 @@
 # phy51171_YH-CO
 
-**Project** 
-Particle-In-Cell (PIC) Simulations of the Two-Stream Instability
+## Project 
+Particle-In-Cell Simulations of the Two-Stream Instability
 
-**Description** 
+## Description
 This project simulates a one-dimensional electrostatic system using the Particle-In-Cell (PIC) method. 
 
-**Usage**
+## Usage
 
-**Directory structure**
+## Directory structure
 - design
   * Contains a notebook that was used to organize the main pieces of the simulation.
 
 - production
-  * ising2d.py: Contains the main Monte Carlo simulation of the 2D Ising Model.
-compute_observables.py: Uses the library ising2d.py to compute physical observables.
+  * Contains the  PIC simulation. It initializes particle positions, velocities, and fields. It updates the particles' positions and velocities over time, while computing the charge density and field. The results, including particle positions and field data, are collected for analysis and visualization.
 
 - analysis
   * Contains a notebook that computes the kinetic energy and momentum. 
 
-- Visualization
+- visualization
   * The computed observables are stored in files here.
 
 - figures
