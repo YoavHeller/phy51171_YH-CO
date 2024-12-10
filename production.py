@@ -44,9 +44,9 @@ class particle:
         grid_pos, field_val, dx = field
         if self.x > grid_pos[-1] or self.x < grid_pos[0]:
             return 0.0
-        nearest_grid_point = int(np.round(self.x / dx))
+        nearest_grid_point =np.where(grid_pos <= self.x)[0].max()
         field_applied = ((self.x - grid_pos[nearest_grid_point]) / dx) * field_val[nearest_grid_point] + (
-                    (grid_pos[nearest_grid_point + 1] - self.x) / dx) * field_val[nearest_grid_point + 1]
+                    (grid_pos[(nearest_grid_point + 1)%len(grid_pos)] - self.x) / dx) * field_val[(nearest_grid_point + 1)%len(grid_pos)]
         return field_applied
 
 
@@ -86,7 +86,7 @@ class field:
             Xiplusone = self.grid_pos[nearest_grid_point + 1]
             density[nearest_grid_point + 1] += (q / self.dx) * (Xiplusone - x)
 
-        return density
+        return density #DElet
 
     def compute_density_triangle(self, particles):
         ##Calculates particles density using triangle method, taken to be the size of two times the grid cell
@@ -172,9 +172,6 @@ class PicSimulation:
         self.order_den = order_den
         self.dt = dt
         self.field = field(Xi, Xf, num_cells)
-        self.num_cells = num_cells
-        self.dx = (Xf - Xi) / num_cells
-        self.grid_pos = np.linspace(Xi, Xf, num_cells)
 
         self.particles = []
         for group in range(len(particle_positions)):
@@ -188,13 +185,12 @@ class PicSimulation:
         self.save_FFT = save_FFT
         self.save_vel = save_vel
 
-        self.data = np.empty((6,), dtype=object)
+        self.data = np.empty((5,), dtype=object)
         self.data[0] = []  #  arrays: (grid_pos, freqs k's, q, m)
         self.data[1] = []  # value of the field
         self.data[2] = []  # fft of the field
         self.data[3] = []  # positions of the particles
         self.data[4] = []  # values of the velocities
-        self.data[5] = []  #values of the densities
 
         self.data[0].append(np.array(self.field.grid_pos))
         self.data[0].append(np.array(self.field.freqs))
@@ -208,6 +204,7 @@ class PicSimulation:
         self.data[0].append(np.array([q_full]))
         self.data[0].append(np.array([m_full]))
 
+
         self.data[1].append(np.array(self.field.field))
         self.data[2].append(np.array(self.field.field_FFT))
         pos_array = np.empty((0,), dtype=float)
@@ -220,8 +217,6 @@ class PicSimulation:
         for particle in self.particles:
             vel_array = np.append(vel_array, particle.v)
         self.data[4].append(np.array(vel_array))
-
-        self.data[5].append(field.compute_density_gaussian(self, self.particles))
 
     def initialize_particles(self, particle_positions, particle_velocities, q, m):
         ## puts in the particles and their posiotions, with equal mass and charges
@@ -277,7 +272,6 @@ class PicSimulation:
                 vel_array = np.append(vel_array, particle.v)
 
             self.data[4].append(np.array(vel_array))
-        self.data[5].append(field.compute_density_gaussian(self, self.particles))
 
     def run_simulation(self, num_steps):
         ##runs the simulation for num_steps times and return the data
@@ -287,31 +281,46 @@ class PicSimulation:
         return self.data
 
 
-
-
-num_cells=5000
-Xi, Xf = -150.0, 150.0 #[meters]
-dt = 1*(10**-12) #seconds
 qe=1.60218*(10**-19) ##Colomb
 me=9.109*(10**-31) ##kg
-Group_Size=100000
-
+Group_Size=1*10**(3)
 q = qe*Group_Size
 m=me*Group_Size
 
+num_cells=400
+total_particles=4*(10**4)
+
+
+Xi, Xf =0,50 #[meters]
+dt = 1*(10**-6) #seconds
+
+v_th_std_dev=1*(10**-4)#meters/sec
+v_0=3*v_th_std_dev ##meters/sec
+
+
 # Initialize positions for protons and electrons as homogeneous distributions
-num_electrons1 = 250# Set the number of electrons
-num_electrons2 = 250
-num_protons = 500    # Set the number of protons
+
+num_electrons1 = int(total_particles/4) # Set the number of electrons
+num_electrons2 = int(total_particles/4)
+num_protons = int(total_particles/2 )  # Set the number of protons
 
 # Homogeneous distribution across the grid, Xi to Xf
 electron_positions1 = np.linspace(Xi, Xf, num_electrons1)
 electron_positions2 = np.linspace(Xi, Xf, num_electrons2)
 proton_positions = np.linspace(Xi, Xf, num_protons)
 
+
+
+
 # Set initial velocities for electrons and protons
-electron_velocity1 = np.full(num_electrons1, 0.001)  # Homogeneous velocity for electrons (e.g., 0.1)
-electron_velocity2 = np.full(num_electrons2, -0.001)  # Homogeneous velocity for electrons (e.g., 0.1)
+def maxwell_boltzmann(size, scale):
+    # Generate random values from a chi-squared distribution with 3 degrees of freedom
+    chi_square_samples = np.random.chisquare(df=1, size=size)
+    # Scale the values to match the Maxwellian distribution
+    return np.sqrt(chi_square_samples) * scale
+
+electron_velocity1 = np.full(num_electrons1, v_0) + maxwell_boltzmann(scale=v_th_std_dev, size=num_electrons1) # Homogeneous velocity for electrons (e.g., 0.1)
+electron_velocity2 = np.full(num_electrons2, -v_0) +maxwell_boltzmann(scale=v_th_std_dev, size=num_electrons1)  # Homogeneous velocity for electrons (e.g., 0.1)
 proton_velocity = np.zeros(num_protons)          # Homogeneous velocity for protons (0)
 
 # Set charges and masses
@@ -334,25 +343,28 @@ simulation = PicSimulation(
     order_den=2
 )
 
-# Run simulation for 10 steps
-steps = 10
-results = simulation.run_simulation(steps)
-
+# Run simulation for ? steps
+results = simulation.run_simulation(20)
 
 # Extract particle positions over time from results[3] (time steps stored here)
-particle_positions_over_time = results[4]  # Assuming this stores the particle positions over time.
+particle_positions_over_time = results[3]# Assuming this stores the particle positions over time.
+particle_velocities_over_time = results[4]
+
+step_shown=13
+plt.scatter(particle_positions_over_time[step_shown][:int(len(particle_positions_over_time[0])/2)],particle_velocities_over_time[step_shown][:int(len(particle_positions_over_time[0])/2)])
+plt.show()
 
 # Create a figure for the plot
-plt.figure(figsize=(10, 6))
+#plt.figure(figsize=(10, 6))
 
 # Loop through each time step and plot the positions
-for t, positions in enumerate(particle_positions_over_time):
-    plt.scatter([t] * len(positions), positions, label=f"Step {t}", alpha=0.7)
+#for t, positions in enumerate(particle_positions_over_time):
+#   plt.scatter([t] * len(positions), positions, label=f"Step {t}", alpha=0.7)
 
 # Customize the plot
-plt.xlabel("Time Step")
-plt.ylabel("Particle Position")
-plt.title("Particle Positions Over Time")
-plt.legend()
-plt.grid(True)
-plt.show()
+#plt.xlabel("Time Step")
+#plt.ylabel("Particle Position")
+#plt.title("Particle Positions Over Time")
+#plt.legend()
+#plt.grid(True)
+#plt.show()
