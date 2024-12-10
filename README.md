@@ -5,6 +5,7 @@ This project simulates a one-dimensional electrostatic system using the Particle
 
 ## Usage
 To run the simulation, execute the following command in the production directory:
+```bash
 python3 run_simulation.py
 
 ## Directory structure
