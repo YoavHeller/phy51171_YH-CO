@@ -39,20 +39,7 @@ def plot_energy_vs_time(full_data_array):
    plt.tight_layout()
    plt.show()
 
-def plot_momentum(full_data_array):
-   data = full_data_array[0]
-   num_steps = full_data_array[2]
-   momentum = full_data_array[1][2]
-   grid_pos = data[0][0]
-   fig, ax = plt.subplots()
-   ax.set_xlim(0,num_steps)
-   plt.plot([t for t in range(num_steps+1)],momentum)
-   plt.ylabel("Momentum")
-   plt.xlabel("Time Step")
-   plt.title("Momemtum Over Time")
-   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left') 
-   plt.tight_layout()
-   plt.show()
+
    
 def plot_field_profile(full_data_array,step):
    data = full_data_array[0]
@@ -79,17 +66,19 @@ def plot_velocity_profile(full_data_array,step):
    Xf = grid_pos[len(grid_pos)-1]
    fig, ax = plt.subplots()
    ax.set_xlim(Xi,Xf)
-   ax.scatter(positions[step][:len(positions[step])//2], velocities[step][:len(velocities[step])//2])
+   ax.scatter(positions[step][:len(positions[step])//2], velocities[step][:len(velocities[step])//2], label=f"Step {step}")
+   ax.scatter(positions[0][:len(positions[0])//2], velocities[0][:len(velocities[0])//2], label="Initial Step")
+   ax.scatter(positions[len(positions)-1][:len(positions[len(positions)-1])//2], velocities[len(positions)-1][:len(velocities[len(positions)-1])//2], label="Final Step" + str( len(positions)-1))
    plt.xlabel("Position")
    plt.ylabel("Velocity")
-   plt.title("Velocity at step "+ str(step))
+   plt.title("Velocity")
    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left') 
    plt.tight_layout()
    plt.show()
 
+#first step, last step, and one in the middle 
 
 print(plot_velocity_profile(full_data_array,10))
 print(plot_field_profile(full_data_array,10))
 print(plot_density_profile(full_data_array,4))
-print(plot_momentum(full_data_array))
 print(plot_energy_vs_time(full_data_array))
