@@ -280,22 +280,25 @@ class PicSimulation:
 
         return self.data
 
-
+##Physical constants
 qe=1.60218*(10**-19) ##Colomb
 me=9.109*(10**-31) ##kg
+
+#macro-particles
 Group_Size=1*10**(3)
 q = qe*Group_Size
 m=me*Group_Size
 
-num_cells=400
-total_particles=4*(10**4)
+total_particles=128000
 
+num_cells=64
+Xi, Xf =0,2*np.pi #[meters]
 
-Xi, Xf =0,50 #[meters]
-dt = 1*(10**-6) #seconds
+dt = 0.1#seconds
 
-v_th_std_dev=1*(10**-4)#meters/sec
+v_th_std_dev=1/3#meters/sec
 v_0=3*v_th_std_dev ##meters/sec
+A= 1*(10**-4)
 
 
 # Initialize positions for protons and electrons as homogeneous distributions
@@ -316,12 +319,20 @@ proton_positions = np.linspace(Xi, Xf, num_protons)
 def maxwell_boltzmann(size, scale):
     # Generate random values from a chi-squared distribution with 3 degrees of freedom
     chi_square_samples = np.random.chisquare(df=1, size=size)
+    sign=np.random.random_integers(0,1,size=size)
     # Scale the values to match the Maxwellian distribution
-    return np.sqrt(chi_square_samples) * scale
+    return (np.sqrt(chi_square_samples) * scale)*(2*sign-1)
 
 electron_velocity1 = np.full(num_electrons1, v_0) + maxwell_boltzmann(scale=v_th_std_dev, size=num_electrons1) # Homogeneous velocity for electrons (e.g., 0.1)
 electron_velocity2 = np.full(num_electrons2, -v_0) +maxwell_boltzmann(scale=v_th_std_dev, size=num_electrons1)  # Homogeneous velocity for electrons (e.g., 0.1)
 proton_velocity = np.zeros(num_protons)          # Homogeneous velocity for protons (0)
+
+
+pert1=A*np.sin(2*np.pi * electron_positions1/Xf)
+pert2=A*np.sin(2*np.pi * electron_positions2/Xf)
+
+electron_velocity1+=pert1
+electron_velocity2+=pert2
 
 # Set charges and masses
 m_electron = m
@@ -344,13 +355,13 @@ simulation = PicSimulation(
 )
 
 # Run simulation for ? steps
-results = simulation.run_simulation(20)
+results = simulation.run_simulation(10)
 
 # Extract particle positions over time from results[3] (time steps stored here)
 particle_positions_over_time = results[3]# Assuming this stores the particle positions over time.
 particle_velocities_over_time = results[4]
 
-step_shown=13
+step_shown=5
 plt.scatter(particle_positions_over_time[step_shown][:int(len(particle_positions_over_time[0])/2)],particle_velocities_over_time[step_shown][:int(len(particle_positions_over_time[0])/2)])
 plt.show()
 
