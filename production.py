@@ -289,7 +289,7 @@ Group_Size=1*10**(3)
 q = qe*Group_Size
 m=me*Group_Size
 
-total_particles=128000
+total_particles=12800
 
 num_cells=64
 Xi, Xf =0,2*np.pi #[meters]
@@ -355,27 +355,6 @@ simulation = PicSimulation(
 )
 
 # Run simulation for ? steps
+steps=10
 results = simulation.run_simulation(10)
 
-# Extract particle positions over time from results[3] (time steps stored here)
-particle_positions_over_time = results[3]# Assuming this stores the particle positions over time.
-particle_velocities_over_time = results[4]
-
-step_shown=5
-plt.scatter(particle_positions_over_time[step_shown][:int(len(particle_positions_over_time[0])/2)],particle_velocities_over_time[step_shown][:int(len(particle_positions_over_time[0])/2)])
-plt.show()
-
-# Create a figure for the plot
-#plt.figure(figsize=(10, 6))
-
-# Loop through each time step and plot the positions
-#for t, positions in enumerate(particle_positions_over_time):
-#   plt.scatter([t] * len(positions), positions, label=f"Step {t}", alpha=0.7)
-
-# Customize the plot
-#plt.xlabel("Time Step")
-#plt.ylabel("Particle Position")
-#plt.title("Particle Positions Over Time")
-#plt.legend()
-#plt.grid(True)
-#plt.show()
