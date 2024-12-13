@@ -12,7 +12,7 @@ To run the simulation, execute the following command in the production directory
 - production
   * Contains the  PIC simulation. It initializes particle positions, velocities, and fields. It updates the particles' positions and velocities over time, while computing the charge density and field. The results, including particle positions and field data, are collected for analysis and visualization.
 - analysis
-  * Contains a notebook that computes the kinetic energy and momentum. 
+  * Saves the data.
 - visualization
   * The computed observables are stored in files here.
 - figures
