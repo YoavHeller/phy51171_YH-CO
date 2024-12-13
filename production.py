@@ -289,7 +289,7 @@ Group_Size=1*10**(3)
 q = qe*Group_Size
 m=me*Group_Size
 
-total_particles=12800
+total_particles=10000
 
 num_cells=64
 Xi, Xf =0,2*np.pi #[meters]
